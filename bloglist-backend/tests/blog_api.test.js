@@ -114,6 +114,21 @@ test('blog without url is not added', async () => {
     .expect(400)
 })
 
+test('a blog can be deleted', async () => {
+  const responseAtStart = await api.get('/api/blogs')
+  const blogToDelete = responseAtStart.body[0]
+
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+
+  const responseAtEnd = await api.get('/api/blogs')
+  assert.strictEqual(responseAtEnd.body.length, initialBlogs.length - 1)
+
+  const contents = responseAtEnd.body.map(r => r.title)
+  assert.ok(!contents.includes(blogToDelete.title))
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
